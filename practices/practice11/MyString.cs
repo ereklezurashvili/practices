@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -351,9 +351,240 @@ public class MyString
         return result;
     }
 
+    public string[] Split(char[] chars)
+    {
+        string[] result=new string[_value.Length];
+        int words = 0;
+        string s = "";
+        bool found= false;
+        for(int i=0; i<_value.Length; i++)
+        {
+            for(int j=0; j<chars.Length; j++)
+            {
+                if (_value[i] == chars[j])
+                {
+                    found = true;
+                }
+                if (_value[i] == chars[j] && s!="")
+                {
+                    result[words] = s;
+                    s = "";
+                    words++;
+                    found = true;
+                    break;
 
-    //toupper da tolower dasaweri maq
-    //replace dasaweri maq
+                }
+                
+            }
+            if (!found)
+            {
+                s += _value[i];
+                
+            }
+            found = false;
+        }
+        result[words] = s;
+        return result;
+    }
+
+    public static string Join(char c, string[] array)
+    {
+        string result = "";
+        string s = "";
+        for(int i=0; i<array.Length; i++)
+        {
+            if(i!=array.Length-1)
+            {
+                s += array[i];
+                s += c;
+
+            }
+            else
+            {
+                s += array[i];
+            }
+        }
+        return s;
+    }
+
+    public char[] ToCharArray()
+    {
+        char[] result = new char[_value.Length];
+        int chars = 0;
+        for(int i=0; i<_value.Length; i++)
+        {
+            result[chars]= _value[i];
+            chars++;
+
+        }
+        return result;
+    }
+
+    public void CopyTo(int idx1,char[] array, int startidx,int count)
+    {
+        int j = 0;
+        for(int i=idx1; i<idx1+count; i++)
+        {
+            array[j] = _value[i];
+            j++;
+
+        }
+    }
+
+    public string Clone()
+    {
+        string res = "";
+        res = _value;
+        return res;
+    }
+
+    public string Intern()
+    {
+        return "ver gavige ras aketebs";
+    }
+
+    public string Replace(string oldv, string newv)
+    {
+        string ans = "";
+        bool result = false;
+        for (int i = 0; i < _value.Length - oldv.Length + 1; i++)
+        {
+            result = true;
+            for (int j = 0; j < oldv.Length; j++)
+            {
+                if (oldv[j] != _value[i + j])
+                {
+                    result = false;
+                    break;
+                }
+            }
+            if (result)
+            {
+                ans += newv;
+                
+            }
+            else
+            {
+                ans += _value[i];
+            }
+
+        }
+        return ans;
+    }
+
+    public string ToLower()
+    {
+        char c = '3';
+        string result = "";
+        for(int i=0; i<_value.Length; i++)
+        {
+            if (_value[i]>64 && _value[i] < 91)
+            {
+                c=(char)(_value[i]+('a' - 'A'));
+                result += c;
+                
+            }
+            else
+            {
+                result += _value[i];
+            }
+        }
+        return result;
+    }
+
+    public string ToUpper()
+    {
+        char c = '3';
+        string result = "";
+        for (int i = 0; i < _value.Length; i++)
+        {
+            if (_value[i] > 96 && _value[i] < 123)
+            {
+                c = (char)(_value[i] - ('a' - 'A'));
+                result += c;
+
+            }
+            else
+            {
+                result += _value[i];
+            }
+        }
+        return result;
+
+    }
+
+    public static int Compare(string s1,string s2,bool caseignore)
+    {
+        int res = 0;
+        if (caseignore == false)
+        {
+            res=MyString.Compare(s1,s2);
+        }
+        else
+        {
+            string news1 = s1.ToLower();
+            string news2 = s2.ToLower();
+            res=MyString.Compare(news1, news2);
+
+        }
+        return res;
+
+    }
+
+    public string PadLeft(int count)
+    {
+        string result = "";
+        for(int i=0; i<count; i++)
+        {
+            result += ' ';
+        }
+        result += _value;
+        return result;
+
+    }
+    public string PadRight(int count)
+    {
+        string result = "";
+        result += _value;
+        for (int i = 0; i < count; i++)
+        {
+            result += ' ';
+        }
+        
+        return result;
+
+    }
+
+    public static string Format(string s, string a,string b)
+    {
+        string result = "";
+        int block1 = 0;
+        int block2 = 0;
+        for(int i=0; i<s.Length-2;i++)
+        {
+            if (s[i]=='{' && s[i+1]=='0' && s[i + 2] == '}')
+            {
+                result += a;
+                i += 2;
+                continue;
+
+            }
+            
+
+            if (s[i] == '{' && s[i + 1] == '1' && s[i + 2] == '}')
+            {
+                result += b;
+                i += 2;
+                continue;
+
+            }
+            result += s[i];
+            
+        }
+        return result;
+    }
+
+
     private int GetLength()
     {
         int length = 0;
@@ -361,4 +592,9 @@ public class MyString
         return length;
     }
 }
+//All(char.IsLetter) ver gavakete
+//Any(char.IsDigit) ver gavakete
+//$"{var}" ver gavakete
+//ToString() stringis klasshi ra azri aq?
+
 
