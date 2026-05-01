@@ -13,7 +13,7 @@ public class FileService
     private string taskPath = "Tasks.txt";
     private string logPath = "Logs.txt";
 
-    // 📖 Read Tasks
+
     public List<Models.Task> ReadTasks()
     {
         List<Models.Task> tasks = new List<Models.Task>();
