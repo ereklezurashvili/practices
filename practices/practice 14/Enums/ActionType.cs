@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace practice_15.Enums;
 
-enum ActionType
+namespace practice_14.Enums;
+
+public enum ActionType
 {
     Created,
     Updated,
