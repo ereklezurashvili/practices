@@ -13,30 +13,28 @@ using static System.Net.Mime.MediaTypeNames;
 namespace practice_14.Services;
 
 
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 public class TaskService
 {
-    private FileService fileService = new FileService();
+    private readonly FileService fileService;
+
+    public TaskService()
+    {
+        fileService = new FileService();
+    }
 
     public void CreateTask(string title, string description)
     {
         List<Models.Task> tasks = fileService.ReadTasks();
 
-        Models.Task task = new Models.Task();
-        task.Id = Guid.NewGuid();
-        task.Title = title;
-        task.Description = description;
-        task.Status = Enums.TaskStatus.ToDo;
-        task.CreatedAt = DateTime.Now;
+        Models.Task task = new Models.Task(title, description);
 
         tasks.Add(task);
 
         fileService.WriteTasks(tasks);
-        AddLog("Task created: " + task.Id);
+
+        AddLog(task.Id, ActionType.Created, "Task created");
+
+        Console.WriteLine("Task created successfully");
     }
 
     public List<Models.Task> GetAllTasks()
@@ -48,33 +46,31 @@ public class TaskService
     {
         List<Models.Task> tasks = fileService.ReadTasks();
 
-        foreach (Models.Task t in tasks)
-        {
-            if (t.Id == id)
-            {
-                return t;
-            }
-        }
+    
 
-        return null;
+        return tasks.FirstOrDefault(t => t.Id == id);
     }
 
- 
-    public void UpdateTask(Guid id, string title, string description)
+    public void UpdateTask(Guid id, string newTitle, string newDescription)
     {
         List<Models.Task> tasks = fileService.ReadTasks();
-        foreach (Models.Task t in tasks)
-        {
-            if (t.Id == id)
-            {
-                t.Title = title;
-                t.Description = description;
 
-                fileService.WriteTasks(tasks);
-                AddLog("Task updated: " + id);
-                return;
-            }
+        Models.Task task = tasks.FirstOrDefault(t => t.Id == id);
+
+        if (task == null)
+        {
+            Console.WriteLine("Task not found");
+            return;
         }
+
+        task.Title = newTitle;
+        task.Description = newDescription;
+
+        fileService.WriteTasks(tasks);
+
+        AddLog(task.Id, ActionType.Updated, "Task updated");
+
+        Console.WriteLine("Task updated successfully");
     }
 
     public void ChangeStatus(Guid id, Enums.TaskStatus newStatus)
@@ -83,81 +79,66 @@ public class TaskService
 
         Models.Task task = tasks.FirstOrDefault(t => t.Id == id);
 
-        if (task != null)
+        if (task == null)
         {
-            task.Status = newStatus;
-
-            fileService.WriteTasks(tasks);
-            AddLog("Status changed: " + id + " -> " + newStatus);
+            Console.WriteLine("Task not found");
+            return;
         }
+
+        task.Status = newStatus;
+
+        fileService.WriteTasks(tasks);
+
+        AddLog(task.Id, ActionType.StatusChanged, "Status changed to " + newStatus);
+
+        Console.WriteLine("Task status updated");
     }
 
     public void DeleteTask(Guid id)
     {
         List<Models.Task> tasks = fileService.ReadTasks();
-        Models.Task found = null;
-        foreach (Models.Task t in tasks)
+
+        Models.Task task = tasks.FirstOrDefault(t => t.Id == id);
+
+        if (task == null)
         {
-            if (t.Id == id)
-            {
-                found = t;
-                break;
-            }
+            Console.WriteLine("Task not found");
+            return;
         }
 
-        if (found != null)
-        {
-            tasks.Remove(found);
+        tasks.Remove(task);
 
-            fileService.WriteTasks(tasks);
-            AddLog("Task deleted: " + id);
-        }
+        fileService.WriteTasks(tasks);
+
+        AddLog(task.Id, ActionType.Deleted, "Task deleted");
+
+        Console.WriteLine("Task deleted successfully");
     }
 
     public List<Models.Task> FilterByStatus(Enums.TaskStatus status)
     {
         List<Models.Task> tasks = fileService.ReadTasks();
-        List<Models.Task> result = new List<Models.Task>();
 
-        foreach (Models.Task t in tasks)
-        {
-            if (t.Status == status)
-            {
-                result.Add(t);
-            }
-        }
-
-        return result;
+        return tasks.Where(t => t.Status == status).ToList();
     }
 
     public List<Log> GetLogsForTask(Guid taskId)
     {
         List<Log> logs = fileService.ReadLogs();
-        List<Log> result = new List<Log>();
 
-        foreach (Log l in logs)
-        {
-            if (l.TaskId == taskId)
-            {
-                result.Add(l);
-            }
-        }
-
-        return result;
+        return logs.Where(l => l.TaskId == taskId).ToList();
     }
-    private void AddLog(string message)
+
+    private void AddLog(Guid taskId, ActionType actionType, string message)
     {
         List<Log> logs = fileService.ReadLogs();
 
-        Log log = new Log();
-        log.Message = message;
-        log.TaskId = Guid.NewGuid(); 
-        log.TimeStamp = DateTime.Now;
+        Log log = new Log(taskId, actionType, message);
 
         logs.Add(log);
 
         fileService.WriteLogs(logs);
 
-        Console.WriteLine(message);
+        Console.WriteLine("Log added: " + message);
     }
 }
