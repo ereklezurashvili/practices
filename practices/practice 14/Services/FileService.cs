@@ -4,86 +4,87 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 
 
 namespace practice_14.Services;
 
 public class FileService
 {
-    private string taskPath = "Tasks.txt";
-    private string logPath = "Logs.txt";
-
+    private readonly string taskPath = "tasks.json";
+    private readonly string logPath = "logs.json";
 
     public List<Models.Task> ReadTasks()
-    {
-        List<Models.Task> tasks = new List<Models.Task>();
-
+    {   
         if (!File.Exists(taskPath))
-            return tasks;
-
-        string[] lines = File.ReadAllLines(taskPath);
-
-        foreach (string line in lines)
         {
-            string[] parts = line.Split('|');
-
-            Models.Task task = new Models.Task();
-            Guid id;
-            Guid.TryParse(parts[0], out id);
-            task.Id = id;
-            task.Title = parts[1];
-            task.Description = parts[2];
-            task.Status = (Enums.TaskStatus)Enum.Parse(typeof(Enums.TaskStatus), parts[3]);
-            task.CreatedAt = DateTime.Parse(parts[4]);
-
-            tasks.Add(task);
+            File.Create(taskPath).Close();
+            return new List<Models.Task>();
         }
 
-        return tasks;
+        using (FileStream stream = new FileStream(taskPath, FileMode.Open, FileAccess.Read))
+        {
+            if (stream.Length == 0)
+            {
+                return new List<Models.Task>();
+            }
+
+            List<Models.Task> tasks = JsonSerializer.Deserialize<List<Models.Task>>(stream);
+
+            if (tasks == null)
+            {
+                return new List<Models.Task>();
+            }
+
+            return tasks;
+        }
     }
 
     public void WriteTasks(List<Models.Task> tasks)
     {
-        List<string> lines = new List<string>();
-
-        foreach (Models.Task t in tasks)
+        using (FileStream stream = new FileStream(taskPath, FileMode.Create, FileAccess.Write))
         {
-            string line = t.Id + "|" + t.Title + "|" + t.Description + "|" + t.Status + "|" + t.CreatedAt;
-            lines.Add(line);
+            JsonSerializer.Serialize(stream, tasks, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
         }
-
-        File.WriteAllLines(taskPath, lines);
     }
 
-   
     public List<Log> ReadLogs()
     {
-        List<Log> logs = new List<Log>();
-
         if (!File.Exists(logPath))
-            return logs;
-
-        string[] lines = File.ReadAllLines(logPath);
-
-        foreach (string line in lines)
         {
-            Log log = new Log();
-            log.Message = line;
-            logs.Add(log);
+            File.Create(logPath).Close();
+            return new List<Log>();
         }
 
-        return logs;
+        using (FileStream stream = new FileStream(logPath, FileMode.Open, FileAccess.Read))
+        {
+            if (stream.Length == 0)
+            {
+                return new List<Log>();
+            }
+
+            List<Log> logs = JsonSerializer.Deserialize<List<Log>>(stream);
+
+            if (logs == null)
+            {
+                return new List<Log>();
+            }
+
+            return logs;
+        }
     }
 
     public void WriteLogs(List<Log> logs)
     {
-        List<string> lines = new List<string>();
-
-        foreach (Log l in logs)
+        using (FileStream stream = new FileStream(logPath, FileMode.Create, FileAccess.Write))
         {
-            lines.Add(l.Message);
+            JsonSerializer.Serialize(stream, logs, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
         }
-
-        File.WriteAllLines(logPath, lines);
     }
 }
