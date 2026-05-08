@@ -1,20 +1,20 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace practice_15.Enums;
 
-enum TaskStatus
+namespace practice_14.Enums;
+
+public enum TaskStatus
 {
-    ToDO,
+
+
+    ToDo,
     InProgress,
-    Testing,
-    Done
+    Done,
+    Testing
 
 }
-
-
 
 
